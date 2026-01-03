@@ -29,7 +29,7 @@ export function Home() {
                 renderItem={({ item }) => (
                     <TouchableOpacity 
                         style={styles.card}
-                        onPress={() => navigation.navigate('details')}
+                        onPress={() => navigation.navigate('details', { movieId: item.id })}
                     >
                         <Image
                             source={{ uri: `https://image.tmdb.org/t/p/w500${item.poster_path}` }}

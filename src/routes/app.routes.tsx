@@ -6,7 +6,11 @@ const Stack = createNativeStackNavigator();
 
 export function AppRoutes() {
     return (
-        <Stack.Navigator screenOptions={{ headerShown: false }}>
+        <Stack.Navigator screenOptions={{ 
+            headerShown: false, 
+            contentStyle: { backgroundColor: '#121212' }
+        }}
+        >
             <Stack.Screen name="home" component={Home}/>
             <Stack.Screen name="details" component={Details}/>
         </Stack.Navigator>
