@@ -11,6 +11,12 @@ export interface Movie {
         id: number;
         name: string;
     }[];
+    credits?: {
+        crew: {
+            job: string;
+            name: string;
+        }[]
+    }
 }
 
 export interface MovieResponse {

@@ -23,11 +23,25 @@ export function Home() {
 
     return (
         <View style={styles.container}>
+            <View style={styles.header}>
+                <Text style={styles.headerTitle}>O que vamos assistir?</Text>
+
+                <View style={{ flexDirection: 'row', gap: 15 }}>
+                    <TouchableOpacity onPress={() => navigation.navigate('favorites')}>
+                        <Text style={{ fontSize: 24 }}>❤️</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity onPress={() => navigation.navigate('search')}>
+                        <Text style={{ fontSize: 24 }}>🔍</Text>
+                    </TouchableOpacity>
+                </View>
+            </View>
+
             <FlatList
                 data={movies}
                 keyExtractor={(item) => String(item.id)}
                 renderItem={({ item }) => (
-                    <TouchableOpacity 
+                    <TouchableOpacity
                         style={styles.card}
                         onPress={() => navigation.navigate('details', { movieId: item.id })}
                     >
@@ -47,6 +61,17 @@ export function Home() {
 }
 
 const styles = StyleSheet.create({
+    header: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 20,
+    },
+    headerTitle: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        color: '#FFF'
+    },
     container: {
         flex: 1,
         backgroundColor: '#121212',
