@@ -1,22 +1,13 @@
 export interface Movie {
     id: number;
-    title: string;
-    poster_path: string;
-    vote_average: number;
-    overview: string;
-    backdrop_path: string;
-    runtime: number;
-    release_date: string;
-    genres: {
-        id: number;
-        name: string;
-    }[];
-    credits?: {
-        crew: {
-            job: string;
-            name: string;
-        }[]
-    }
+    titulo: string;
+    nota: number;
+    sinopse: string;
+    imagem: string | null;
+    ano: string;
+    duracao?: number;
+    generos?: string[];
+    diretor?: string;
 }
 
 export interface MovieResponse {

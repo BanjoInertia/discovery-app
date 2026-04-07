@@ -1,6 +1,6 @@
-import { useRoute } from '@react-navigation/native';
+import { useRoute, useNavigation } from '@react-navigation/native';
 import { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity } from 'react-native'
+import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, FlatList } from 'react-native'
 import { saveFavorite, removeFavorite, isFavorite } from '../../services/storage';
 import { Movie } from '../../types/Movie';
 import api from '../../services/api';
@@ -11,15 +11,17 @@ type ParamsProps = {
 
 export function Details() {
     const route = useRoute();
+    const navigation = useNavigation<any>();
     const { movieId } = route.params as ParamsProps;
 
     const [movieDetails, setMovieDetails] = useState<Movie | null>(null);
+    const [similarMovies, setSimilarMovies] = useState<Movie[]>([]);
     const [isFavorited, setIsFavorited] = useState(false);
 
     useEffect(() => {
         async function fetchMovieById() {
             try {
-                const response = await api.get(`/movie/${movieId}?append_to_response=credits`);
+                const response = await api.get(`/api/filmes/${movieId}`);
                 setMovieDetails(response.data);
 
                 console.log(response.data);
@@ -33,6 +35,20 @@ export function Details() {
             setIsFavorited(status);
         }
 
+        async function loadData() {
+            try {
+                const response = await api.get(`/api/filmes/${movieId}`);
+                setMovieDetails(response.data);
+
+                const similarRes = await api.get(`/api/filmes/${movieId}/similares`);
+                setSimilarMovies(similarRes.data);
+
+            } catch (error) {
+                console.log(error);
+            }
+        }
+
+        loadData();
         fetchMovieById();
         loadFavoriteStatus();
     }, [movieId])
@@ -61,7 +77,7 @@ export function Details() {
         <View style={styles.container}>
             <View style={styles.header}>
                 <Image
-                    source={{ uri: `https://image.tmdb.org/t/p/w500${movieDetails?.poster_path}` }}
+                    source={{ uri: movieDetails?.imagem || 'https://via.placeholder.com/500x750?text=Sem+Imagem' }}
                     style={styles.posterImage}
                 />
 
@@ -76,35 +92,55 @@ export function Details() {
             </View>
 
             <ScrollView style={styles.contentContainer}>
-                <Text style={styles.title}>{movieDetails?.title}</Text>
+                <Text style={styles.title}>{movieDetails?.titulo}</Text>
 
                 <View style={styles.ratingContainer}>
-                    <Text style={styles.rating}>⭐ {movieDetails?.vote_average.toFixed(1)}/10</Text>
+                    <Text style={styles.rating}>
+                        ⭐ {movieDetails?.nota ? movieDetails.nota.toFixed(1) : "N/A"}/10
+                    </Text>
                 </View>
 
                 <View style={styles.infoContainer}>
-                    <Text style={styles.infoText}>📅 {movieDetails?.release_date.substring(0, 4)}</Text>
+                    <Text style={styles.infoText}>📅 {movieDetails?.ano.substring(0, 4)}</Text>
 
-                    <Text style={styles.infoText}>⏳ {movieDetails?.runtime} min</Text>
+                    <Text style={styles.infoText}>⏳ {movieDetails?.duracao} min</Text>
                 </View>
 
                 <Text style={styles.genres}>
-                    {movieDetails?.genres.map(g => g.name).join(', ')}
+                    {movieDetails?.generos?.join(', ') || "Gênero não informado"}
                 </Text>
 
                 <Text style={styles.subtitle}>Sinopse</Text>
-                <Text style={styles.overview}>{movieDetails?.overview}</Text>
+                <Text style={styles.overview}>{movieDetails?.sinopse}</Text>
 
                 <View style={styles.directorContainer}>
                     <Text style={styles.directorLabel}>Direção:</Text>
                     <Text style={styles.directorName}>
-                        {movieDetails?.credits?.crew
-                            .filter(person => person.job === 'Director')
-                            .map(director => director.name)
-                            .join(', ')
-                        }
+                        {movieDetails?.diretor}
                     </Text>
                 </View>
+
+                <Text style={styles.subtitle}>Filmes Similares</Text>
+
+                <FlatList
+                    horizontal
+                    data={similarMovies}
+                    keyExtractor={(item) => String(item.id)}
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={{ paddingBottom: 70 }}
+                    renderItem={({ item }) => (
+                        <TouchableOpacity
+                            style={styles.similarCard}
+                            onPress={() => navigation.push('details', { movieId: item.id })}
+                        >
+                            <Image
+                                source={{ uri: item.imagem || 'https://via.placeholder.com/100x150' }}
+                                style={styles.similarPoster}
+                            />
+                            <Text numberOfLines={1} style={styles.similarTitle}>{item.titulo}</Text>
+                        </TouchableOpacity>
+                    )}
+                />
             </ScrollView>
         </View>
     )
@@ -199,5 +235,20 @@ const styles = StyleSheet.create({
         color: '#FFF',
         fontSize: 16,
         fontWeight: 'bold'
-    }
+    },
+    similarCard: {
+        width: 110,
+        marginLeft: 16,
+    },
+    similarPoster: {
+        width: 100,
+        height: 150,
+        borderRadius: 8,
+    },
+    similarTitle: {
+        color: '#FFF',
+        fontSize: 12,
+        marginTop: 5,
+        textAlign: 'center',
+    },
 });

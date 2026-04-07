@@ -35,12 +35,14 @@ export function Favorites() {
                         onPress={() => navigation.navigate('details', { movieId: item.id })}
                     >
                         <Image
-                            source={{ uri: `https://image.tmdb.org/t/p/w500${item.poster_path}` }}
+                            source={{ uri: item.imagem || 'https://via.placeholder.com/80x120?text=Sem+Imagem' }}
                             style={styles.poster}
                         />
                         <View style={{ flex: 1, justifyContent: 'center' }}>
-                            <Text style={styles.movieTitle}>{item.title}</Text>
-                            <Text style={styles.movieRate}>⭐ {item.vote_average}</Text>
+                            <Text style={styles.movieTitle}>{item.titulo}</Text>
+                            <Text style={styles.movieRate}>
+                                ⭐ {item.nota ? item.nota.toFixed(1) : "N/A"}/10
+                            </Text>
                         </View>
                     </TouchableOpacity>
                 )}

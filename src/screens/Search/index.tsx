@@ -21,13 +21,12 @@ export function Search() {
         const timer = setTimeout(async () => {
             setLoading(true);
             try {
-                const response = await api.get('/search/movie', {
+                const response = await api.get('/api/pesquisa', {
                     params: {
-                        query: searchText,
-                        include_adult: false,
+                        nome: searchText,
                     }
                 });
-                setResults(response.data.results);
+                setResults(response.data);
             } catch (error) {
                 console.log(error);
             } finally {
@@ -62,17 +61,17 @@ export function Search() {
                         style={styles.itemContainer}
                         onPress={() => navigation.navigate('details', { movieId: item.id })}
                     >
-                        {item.poster_path && (
+                        {item.imagem && (
                             <Image
-                                source={{ uri: `https://image.tmdb.org/t/p/w200${item.poster_path}` }}
+                                source={{ uri: item.imagem }}
                                 style={styles.poster}
                             />
                         )}
 
                         <View style={styles.textContainer}>
-                            <Text style={styles.title}>{item.title}</Text>
+                            <Text style={styles.title}>{item.titulo}</Text>
                             <Text style={styles.year}>
-                                {item.release_date ? item.release_date.substring(0, 4) : '-'}
+                                {item.ano ? item.ano.substring(0, 4) : '-'}
                             </Text>
                         </View>
                     </TouchableOpacity>

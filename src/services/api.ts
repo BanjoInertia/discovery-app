@@ -1,11 +1,11 @@
 import axios from 'axios';
+import Constants from 'expo-constants';
+
+const debuggerHost = Constants.expoConfig?.hostUri;
+const localhost = debuggerHost?.split(':')[0];
 
 const api = axios.create({
-    baseURL: 'https://api.themoviedb.org/3',
-    params: {
-        api_key: '3cb4c4c50bc0082deec6207848aa1adb',
-        language: 'pt-BR'
-    }
+    baseURL: `http://${localhost}:8000`,
 });
 
 export default api;

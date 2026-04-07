@@ -6,20 +6,52 @@ import { useNavigation } from "@react-navigation/native";
 
 export function Home() {
     const [movies, setMovies] = useState<Movie[]>([]);
-    const navigation = useNavigation()
+    const [nowPlaying, setNowPlaying] = useState<Movie[]>([]);
+    const [genres, setGenres] = useState<{id: number, name: string}[]>([]);
+    const [selectedGenre, setSelectedGenre] = useState<number>(0);
+    const navigation = useNavigation<any>()
+
+    useEffect(() => {
+        async function fetchInitialData() {
+            try {
+                const [cartazRes, generosRes] = await Promise.all([
+                    api.get('/api/filmes/cartaz'),
+                    api.get('/api/generos')
+                ]);
+                setNowPlaying(cartazRes.data);
+                setGenres([{id: 0, name: "Todos"}, ...generosRes.data]);
+            } catch (error: any) {
+                console.log("Erro ao inicializar:", error.message);
+            }
+        }
+        fetchInitialData();
+    }, []);
 
     useEffect(() => {
         async function fetchMovies() {
             try {
-                const response = await api.get('/movie/popular');
-                setMovies(response.data.results);
-            } catch (error) {
-                console.log(error);
+                const url = selectedGenre === 0 
+                    ? '/api/filmes' 
+                    : `/api/filmes?genero_id=${selectedGenre}`;
+                const response = await api.get(url);
+                setMovies(response.data);
+            } catch (error: any) {
+                console.log("Erro ao buscar populares:", error.message);
             }
         }
-
         fetchMovies();
-    }, []);
+    }, [selectedGenre]);
+
+    async function handleSurprise() {
+        try {
+            const response = await api.get('/api/surpresa');
+            const { id } = response.data;
+
+            navigation.navigate('details', { movieId: id });
+        } catch (error) {
+            console.log("Erro na roleta:", error);
+        }
+    }
 
     return (
         <View style={styles.container}>
@@ -27,6 +59,10 @@ export function Home() {
                 <Text style={styles.headerTitle}>O que vamos assistir?</Text>
 
                 <View style={{ flexDirection: 'row', gap: 15 }}>
+                    <TouchableOpacity onPress={handleSurprise}>
+                        <Text style={{ fontSize: 24 }}>🎲</Text>
+                    </TouchableOpacity>
+
                     <TouchableOpacity onPress={() => navigation.navigate('favorites')}>
                         <Text style={{ fontSize: 24 }}>❤️</Text>
                     </TouchableOpacity>
@@ -40,18 +76,70 @@ export function Home() {
             <FlatList
                 data={movies}
                 keyExtractor={(item) => String(item.id)}
+                showsVerticalScrollIndicator={false}
+                ListHeaderComponent={() => (
+                    <View style={{ marginBottom: 16 }}>
+                        {nowPlaying.length > 0 && (
+                            <>
+                                <Text style={styles.sectionTitle}>Em Cartaz</Text>
+                                <FlatList
+                                    data={nowPlaying}
+                                    horizontal
+                                    showsHorizontalScrollIndicator={false}
+                                    keyExtractor={(item) => String(item.id)}
+                                    renderItem={({ item }) => (
+                                        <TouchableOpacity 
+                                            style={styles.nowPlayingCard}
+                                            onPress={() => navigation.navigate('details', { movieId: item.id })}
+                                        >
+                                            <Image 
+                                                source={{ uri: item.imagem || 'https://via.placeholder.com/150x225?text=Sem+Capa' }}
+                                                style={styles.nowPlayingPoster}
+                                            />
+                                        </TouchableOpacity>
+                                    )}
+                                />
+                            </>
+                        )}
+                        <Text style={[styles.sectionTitle, { marginTop: 24, marginBottom: 16 }]}>Categorias</Text>
+                        <FlatList
+                            data={genres}
+                            horizontal
+                            showsHorizontalScrollIndicator={false}
+                            keyExtractor={(item) => String(item.id)}
+                            renderItem={({ item }) => (
+                                <TouchableOpacity 
+                                    style={[
+                                        styles.genrePill, 
+                                        selectedGenre === item.id && styles.genrePillActive
+                                    ]}
+                                    onPress={() => setSelectedGenre(item.id)}
+                                >
+                                    <Text style={[
+                                        styles.genreText,
+                                        selectedGenre === item.id && styles.genreTextActive
+                                    ]}>{item.name}</Text>
+                                </TouchableOpacity>
+                            )}
+                        />
+
+                        <Text style={[styles.sectionTitle, { marginTop: 24 }]}>Populares</Text>
+                    </View>
+                )}
                 renderItem={({ item }) => (
                     <TouchableOpacity
                         style={styles.card}
                         onPress={() => navigation.navigate('details', { movieId: item.id })}
                     >
                         <Image
-                            source={{ uri: `https://image.tmdb.org/t/p/w500${item.poster_path}` }}
+                            source={{ uri: item.imagem || 'https://via.placeholder.com/150x225?text=Sem+Capa' }}
                             style={styles.poster}
                         />
                         <View>
-                            <Text style={styles.title}>{item.title}</Text>
-                            <Text style={styles.vote}>⭐ {item.vote_average}</Text>
+                            <Text style={styles.title}>{item.titulo}</Text>
+                            <Text style={styles.vote}>
+                                ⭐ {item.nota ? item.nota.toFixed(1) : "N/A"}
+                            </Text>
                         </View>
                     </TouchableOpacity>
                 )}
@@ -101,5 +189,37 @@ const styles = StyleSheet.create({
     },
     vote: {
         color: '#BBB'
+    },
+    sectionTitle: {
+        color: '#FFF',
+        fontSize: 20,
+        fontWeight: 'bold',
+        marginBottom: 12
+    },
+    nowPlayingCard: {
+        marginRight: 16,
+    },
+    nowPlayingPoster: {
+        width: 120,
+        height: 180,
+        borderRadius: 8,
+    },
+    genrePill: {
+        paddingHorizontal: 16,
+        paddingVertical: 8,
+        backgroundColor: '#2A2A2A',
+        borderRadius: 20,
+        marginRight: 12,
+    },
+    genrePillActive: {
+        backgroundColor: '#EAB308',
+    },
+    genreText: {
+        color: '#FFF',
+        fontSize: 14,
+        fontWeight: 'bold',
+    },
+    genreTextActive: {
+        color: '#121212',
     }
 });
