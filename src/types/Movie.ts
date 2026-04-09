@@ -1,3 +1,10 @@
+export interface Actor {
+    id: number;
+    nome: string;
+    personagem: string;
+    imagem: string | null;
+}
+
 export interface Movie {
     id: number;
     titulo: string;
@@ -8,6 +15,8 @@ export interface Movie {
     duracao?: number;
     generos?: string[];
     diretor?: string;
+    elenco?: Actor[];
+    trailer?: string;
 }
 
 export interface MovieResponse {
