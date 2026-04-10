@@ -8,9 +8,7 @@ Explore filmes populares, filtre por gênero e década, avalie com estrelas, sal
 
 ### 🎥 Demonstração Completa
 
-<!-- Para o vídeo aparecer no GitHub: edite este README pelo GitHub, arraste o demo.mp4 na caixa de texto, e cole o link gerado abaixo -->
-
-https://github.com/user-attachments/assets/COLE_O_LINK_AQUI
+https://github.com/user-attachments/assets/971643ac-92b7-4035-92a5-6d61b22437de
 
 > *Ou baixe diretamente: [📥 demo.mp4](./assets/readme/demo.mp4)*
 
