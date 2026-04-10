@@ -199,7 +199,7 @@ Escaneie o QR Code com o Expo Go no celular.
 
 Quer testar sem configurar nada? Baixe o APK direto:
 
-[📥 Baixar APK (Android)](https://expo.dev/artifacts/eas/d9nHKXJFFpyWtMtMNKizPA.apk)
+[📥 Baixar APK (Android)](https://expo.dev/artifacts/eas/d8FZtKurZi2SC9kUY1gmfN.apk)
 
 ---
 
